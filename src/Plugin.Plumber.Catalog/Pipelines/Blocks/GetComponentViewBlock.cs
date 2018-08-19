@@ -8,12 +8,10 @@ using Sitecore.Framework.Pipelines;
 using System.Linq;
 using Plugin.Plumber.Catalog.Attributes;
 using Plugin.Plumber.Catalog.Pipelines.Arguments;
-using Plugin.Plumber.Catalog.Pipelines;
 using System.Collections.Generic;
 
-namespace Plugin.Sample.Notes
+namespace Plugin.Plumber.Catalog.Pipelines.Blocks
 {
-
     [PipelineDisplayName("GetComponentViewBlock")]
     public class GetComponentViewBlock : PipelineBlock<EntityView, EntityView, CommercePipelineExecutionContext>
     {
@@ -42,11 +40,10 @@ namespace Plugin.Sample.Notes
             var catalogViewsPolicy = context.GetPolicy<KnownCatalogViewsPolicy>();
             var isCatalogView = request.ViewName.Equals(catalogViewsPolicy.Master, StringComparison.OrdinalIgnoreCase);
             var isVariationView = request.ViewName.Equals(catalogViewsPolicy.Variant, StringComparison.OrdinalIgnoreCase);
-            var isConnectView = arg.Name.Equals(catalogViewsPolicy.ConnectSellableItem, StringComparison.OrdinalIgnoreCase);
             var isPotentialEditView = arg.Action.StartsWith("Edit-", StringComparison.OrdinalIgnoreCase);
 
             // Make sure that we target the correct views
-            if (!isCatalogView && !isVariationView && !isConnectView && !isPotentialEditView)
+            if (!isCatalogView && !isVariationView && !isPotentialEditView)
             {
                 return arg;
             }
@@ -90,7 +87,7 @@ namespace Plugin.Sample.Notes
                         targetView = view;
                     }
 
-                    if (isCatalogView || isVariationView || isConnectView || (isPotentialEditView && isEditView))
+                    if (isCatalogView || isVariationView || (isPotentialEditView && isEditView))
                     {
                         var props = componentType.GetProperties();
 
@@ -105,8 +102,8 @@ namespace Plugin.Sample.Notes
                                     Name = prop.Name,
                                     DisplayName = propAttr.DisplayName,
                                     RawValue = component != null ? prop.GetValue(component) : "",
-                                    IsReadOnly = !isEditView && propAttr.Editable,
-                                    IsRequired = false
+                                    IsReadOnly = !isEditView && propAttr.IsReadOnly,
+                                    IsRequired = propAttr.IsRequired                                    
                                 });
                             }
                         }

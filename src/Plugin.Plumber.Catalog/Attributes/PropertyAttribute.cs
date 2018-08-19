@@ -10,12 +10,14 @@ namespace Plugin.Plumber.Catalog.Attributes
     public class PropertyAttribute : System.Attribute
     {
         public string DisplayName { get; private set; }
-        public bool Editable { get; private set; }
+        public bool IsReadOnly { get; private set; }
+        public bool IsRequired { get; private set; }
 
-        public PropertyAttribute(string displayName = "", bool editable = true)
+        public PropertyAttribute(string displayName = "", bool isReadOnly = true, bool isRequired = false)
         {
             DisplayName = displayName;
-            Editable = editable;
+            IsReadOnly = isReadOnly;
+            IsRequired = isRequired;
         }
     }
 }

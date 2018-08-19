@@ -7,7 +7,6 @@
 namespace Plugin.Plumber.Catalog
 {
     using System.Reflection;
-    using global::Plugin.Sample.Notes;
     using Microsoft.Extensions.DependencyInjection;
     using Sitecore.Commerce.Core;
     using Sitecore.Commerce.EntityViews;
@@ -45,6 +44,7 @@ namespace Plugin.Plumber.Catalog
                         .ConfigurePipeline<IGetEntityViewPipeline>(c =>
                         {
                             c.Add<GetComponentViewBlock>().After<GetSellableItemDetailsViewBlock>();
+                            //.Add<GetComponentConnectViewBlock>().After<GetComponentViewBlock>();
                         })
                         .ConfigurePipeline<IPopulateEntityViewActionsPipeline>(c =>
                         {
