@@ -43,8 +43,8 @@ namespace Plugin.Plumber.Catalog
                         })
                         .ConfigurePipeline<IGetEntityViewPipeline>(c =>
                         {
-                            c.Add<GetComponentViewBlock>().After<GetSellableItemDetailsViewBlock>();
-                            //.Add<GetComponentConnectViewBlock>().After<GetComponentViewBlock>();
+                            c.Add<GetComponentViewBlock>().After<GetSellableItemDetailsViewBlock>()
+                            .Add<GetComponentConnectViewBlock>().After<GetComponentViewBlock>();
                         })
                         .ConfigurePipeline<IPopulateEntityViewActionsPipeline>(c =>
                         {

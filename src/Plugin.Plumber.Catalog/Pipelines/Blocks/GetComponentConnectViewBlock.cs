@@ -66,7 +66,7 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
                         Name = componentType.FullName.Replace(".", "_"),
                         DisplayName = entityViewAttribute?.ViewName ?? componentType.Name,
                         EntityId = arg.EntityId,
-                        EntityVersion = arg.EntityVersion
+                        EntityVersion = arg.EntityVersion                       
                     };
 
                     arg.ChildViews.Add(view);
