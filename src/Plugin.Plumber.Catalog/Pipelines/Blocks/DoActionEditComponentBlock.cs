@@ -9,23 +9,23 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Plugin.Plumber.Catalog.Commanders;
 
 namespace Plugin.Plumber.Catalog.Pipelines.Blocks
 {
     [PipelineDisplayName("DoActionEditComponentBlock")]
     public class DoActionEditComponentBlock : PipelineBlock<EntityView, EntityView, CommercePipelineExecutionContext>
     {
-        private readonly CommerceCommander commerceCommander;
+        private readonly CatalogSchemaCommander catalogSchemaCommander;
 
-        public DoActionEditComponentBlock(CommerceCommander commerceCommander)
+        public DoActionEditComponentBlock(CatalogSchemaCommander catalogSchemaCommander)
         {
-            this.commerceCommander = commerceCommander;
+            this.catalogSchemaCommander = catalogSchemaCommander;
         }
 
         public async override Task<EntityView> Run(EntityView arg, CommercePipelineExecutionContext context)
         {
             Condition.Requires(arg).IsNotNull($"{Name}: The argument cannot be null.");
-            //var notesActionsPolicy = context.GetPolicy<KnownNotesActionsPolicy>();
 
             // Only proceed if the right action was invoked
             if (string.IsNullOrEmpty(arg.Action) || !arg.Action.StartsWith("Edit-", StringComparison.OrdinalIgnoreCase))
@@ -40,7 +40,7 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
                 return arg;
             }
 
-            var applicableComponentTypes = await GetApplicableComponentTypes(context, sellableItem);
+            var applicableComponentTypes = await this.catalogSchemaCommander.GetApplicableComponentTypes(context, sellableItem);
             var editedComponentType = applicableComponentTypes.SingleOrDefault(comp => arg.Action == $"Edit-{comp.FullName}");
 
             if (editedComponentType != null)
@@ -69,35 +69,10 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
                 //component.InternalNotes = arg.Properties.FirstOrDefault(x => x.Name.Equals(nameof(NotesComponent.InternalNotes), StringComparison.OrdinalIgnoreCase))?.Value;
 
                 // Persist changes
-                await this.commerceCommander.Pipeline<IPersistEntityPipeline>().Run(new PersistEntityArgument(sellableItem), context);
+                await this.catalogSchemaCommander.Pipeline<IPersistEntityPipeline>().Run(new PersistEntityArgument(sellableItem), context);
             }
 
             return arg;
-        }
-
-        private async Task<List<Type>> GetApplicableComponentTypes(CommercePipelineExecutionContext context, SellableItem sellableItem)
-        {
-            // Get the item definition
-            var catalogs = sellableItem.GetComponent<CatalogsComponent>();
-
-            // TODO: What happens if a sellableitem is part of multiple catalogs?
-            var catalog = catalogs.GetComponent<CatalogComponent>();
-            var itemDefinition = catalog.ItemDefinition;
-
-            var sellableItemComponentsArgument = new SellableItemComponentsArgument(itemDefinition);
-            sellableItemComponentsArgument = await commerceCommander.Pipeline<IGetSellableItemComponentsPipeline>().Run(sellableItemComponentsArgument, context);
-
-            var applicableComponentTypes = new List<Type>();
-            foreach (var component in sellableItemComponentsArgument.SellableItemComponents)
-            {
-                System.Attribute[] attrs = System.Attribute.GetCustomAttributes(component);
-                if (attrs.SingleOrDefault(attr => attr is ItemDefinitionAttribute && ((ItemDefinitionAttribute)attr).ItemDefinition == itemDefinition) is ItemDefinitionAttribute itemDefinitionAttribute)
-                {
-                    applicableComponentTypes.Add(component);
-                }
-            }
-
-            return applicableComponentTypes;
         }
     }
 }

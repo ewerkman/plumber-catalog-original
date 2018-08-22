@@ -1,4 +1,5 @@
 ﻿using Plugin.Plumber.Catalog.Attributes;
+using Plugin.Plumber.Catalog.Commanders;
 using Plugin.Plumber.Catalog.Pipelines.Arguments;
 using Sitecore.Commerce.Core;
 using Sitecore.Commerce.EntityViews;
@@ -16,13 +17,13 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
     [PipelineDisplayName("GetComponentConnectViewBlock")]
     public class GetComponentConnectViewBlock : PipelineBlock<EntityView, EntityView, CommercePipelineExecutionContext>
     {
+        private readonly CatalogSchemaCommander catalogSchemaCommander;
         private readonly ViewCommander viewCommander;
-        private readonly IGetSellableItemComponentsPipeline getSellableItemComponentsPipeline;
 
-        public GetComponentConnectViewBlock(ViewCommander viewCommander, IGetSellableItemComponentsPipeline getSellableItemComponentsPipeline)
+        public GetComponentConnectViewBlock(ViewCommander viewCommander, CatalogSchemaCommander catalogSchemaCommander)
         {
             this.viewCommander = viewCommander;
-            this.getSellableItemComponentsPipeline = getSellableItemComponentsPipeline;
+            this.catalogSchemaCommander = catalogSchemaCommander;
         }
 
         public async override Task<EntityView> Run(EntityView arg, CommercePipelineExecutionContext context)
@@ -47,11 +48,11 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
                 return arg;
             }
 
-            List<Type> componentTypes = await GetComponentTypes(context, sellableItem);
+            List<Type> allComponentTypes = await catalogSchemaCommander.GetAllComponentTypes(context, sellableItem);
 
             var targetView = arg;
 
-            foreach (var componentType in componentTypes)
+            foreach (var componentType in allComponentTypes)
             {
                 System.Attribute[] attrs = System.Attribute.GetCustomAttributes(componentType);
 
@@ -98,19 +99,6 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
             return arg;
         }
 
-        private async Task<List<Type>> GetComponentTypes(CommercePipelineExecutionContext context, SellableItem sellableItem)
-        {
-            // Get the item definition
-            var catalogs = sellableItem.GetComponent<CatalogsComponent>();
 
-            // TODO: What happens if a sellableitem is part of multiple catalogs?
-            var catalog = catalogs.GetComponent<CatalogComponent>();
-            var itemDefinition = catalog.ItemDefinition;
-
-            var sellableItemComponentsArgument = new SellableItemComponentsArgument(itemDefinition);
-            sellableItemComponentsArgument = await viewCommander.Pipeline<IGetSellableItemComponentsPipeline>().Run(sellableItemComponentsArgument, context);
-
-            return sellableItemComponentsArgument.SellableItemComponents;
-        }
     }
 }

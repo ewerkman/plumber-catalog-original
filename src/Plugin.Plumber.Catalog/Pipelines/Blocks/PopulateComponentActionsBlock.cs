@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Plugin.Plumber.Catalog.Commanders;
 
 namespace Plugin.Plumber.Catalog.Pipelines.Blocks
 {
@@ -17,12 +18,12 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
     public class PopulateComponentActionsBlock : PipelineBlock<EntityView, EntityView, CommercePipelineExecutionContext>
     {
         private readonly ViewCommander viewCommander;
-        private readonly IGetSellableItemComponentsPipeline getSellableItemComponentsPipeline;
+        private readonly CatalogSchemaCommander catalogSchemaCommander;        
 
-        public PopulateComponentActionsBlock(ViewCommander viewCommander, IGetSellableItemComponentsPipeline getSellableItemComponentsPipeline)
+        public PopulateComponentActionsBlock(ViewCommander viewCommander, CatalogSchemaCommander catalogSchemaCommander)
         {
             this.viewCommander = viewCommander;
-            this.getSellableItemComponentsPipeline = getSellableItemComponentsPipeline;
+            this.catalogSchemaCommander = catalogSchemaCommander;
         }
 
         public async override Task<EntityView> Run(EntityView arg, CommercePipelineExecutionContext context)
@@ -40,7 +41,7 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
 
             if (sellableItem != null)
             {
-                List<Type> applicableComponentTypes = await GetApplicableComponentTypes(context, sellableItem);
+                List<Type> applicableComponentTypes = await this.catalogSchemaCommander.GetApplicableComponentTypes(context, sellableItem);
 
                 foreach (var componentType in applicableComponentTypes)
                 {
@@ -66,31 +67,6 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
             }
             
             return arg;
-        }
-
-        private async Task<List<Type>> GetApplicableComponentTypes(CommercePipelineExecutionContext context, SellableItem sellableItem)
-        {
-            // Get the item definition
-            var catalogs = sellableItem.GetComponent<CatalogsComponent>();
-
-            // TODO: What happens if a sellableitem is part of multiple catalogs?
-            var catalog = catalogs.GetComponent<CatalogComponent>();
-            var itemDefinition = catalog.ItemDefinition;
-
-            var sellableItemComponentsArgument = new SellableItemComponentsArgument(itemDefinition);
-            sellableItemComponentsArgument = await viewCommander.Pipeline<IGetSellableItemComponentsPipeline>().Run(sellableItemComponentsArgument, context);
-
-            var applicableComponentTypes = new List<Type>();
-            foreach (var component in sellableItemComponentsArgument.SellableItemComponents)
-            {
-                System.Attribute[] attrs = System.Attribute.GetCustomAttributes(component);
-                if (attrs.SingleOrDefault(attr => attr is ItemDefinitionAttribute && ((ItemDefinitionAttribute)attr).ItemDefinition == itemDefinition) is ItemDefinitionAttribute itemDefinitionAttribute)
-                {
-                    applicableComponentTypes.Add(component);
-                }
-            }
-
-            return applicableComponentTypes;
         }
     }
 }
