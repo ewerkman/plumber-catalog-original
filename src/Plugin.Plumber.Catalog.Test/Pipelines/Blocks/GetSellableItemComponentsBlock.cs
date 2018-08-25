@@ -2,9 +2,9 @@
 using Plugin.Plumber.Catalog.Pipelines.Arguments;
 using Sitecore.Framework.Pipelines;
 using System.Threading.Tasks;
-using Plugin.Plumber.Catalog.Test.Components;
+using Plugin.Plumber.Catalog.Sample.Components;
 
-namespace Plugin.Plumber.Catalog.Test.Pipelines.Blocks
+namespace Plugin.Plumber.Catalog.Sample.Pipelines.Blocks
 {
     public class GetSellableItemComponentsBlock : PipelineBlock<SellableItemComponentsArgument, SellableItemComponentsArgument, CommercePipelineExecutionContext>
     {

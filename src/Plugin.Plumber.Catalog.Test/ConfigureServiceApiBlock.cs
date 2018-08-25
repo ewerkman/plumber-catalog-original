@@ -4,7 +4,7 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Plugin.Plumber.Catalog.Test
+namespace Plugin.Plumber.Catalog.Sample
 {
     using System.Threading.Tasks;
 

@@ -4,12 +4,12 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Plugin.Plumber.Catalog.Test
+namespace Plugin.Plumber.Catalog.Sample
 {
     using System.Reflection;
     using Microsoft.Extensions.DependencyInjection;
     using Plugin.Plumber.Catalog.Pipelines;
-    using Plugin.Plumber.Catalog.Test.Pipelines.Blocks;
+    using Plugin.Plumber.Catalog.Sample.Pipelines.Blocks;
     using Sitecore.Commerce.Core;
     using Sitecore.Framework.Configuration;
     using Sitecore.Framework.Pipelines.Definitions.Extensions;
