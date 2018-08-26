@@ -82,11 +82,13 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
 
                         if (propAttributes.SingleOrDefault(attr => attr is PropertyAttribute) is PropertyAttribute propAttr)
                         {
+                            var value = prop.GetValue(component);
+
                             targetView.Properties.Add(new ViewProperty
                             {
                                 Name = prop.Name,
                                 DisplayName = propAttr.DisplayName,
-                                RawValue = component != null ? prop.GetValue(component) : "",
+                                RawValue = component != null ? value : "",
                                 IsReadOnly = propAttr.IsReadOnly,
                                 IsRequired = propAttr.IsRequired
                             });

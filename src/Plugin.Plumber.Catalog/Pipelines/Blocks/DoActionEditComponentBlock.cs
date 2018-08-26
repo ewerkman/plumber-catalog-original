@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Plugin.Plumber.Catalog.Commanders;
+using System.ComponentModel;
+using Microsoft.Extensions.Logging;
 
 namespace Plugin.Plumber.Catalog.Pipelines.Blocks
 {
@@ -23,56 +25,83 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
             this.catalogSchemaCommander = catalogSchemaCommander;
         }
 
-        public async override Task<EntityView> Run(EntityView arg, CommercePipelineExecutionContext context)
+        public async override Task<EntityView> Run(EntityView entityView, CommercePipelineExecutionContext context)
         {
-            Condition.Requires(arg).IsNotNull($"{Name}: The argument cannot be null.");
+            Condition.Requires(entityView).IsNotNull($"{Name}: The argument cannot be null.");
 
             // Only proceed if the right action was invoked
-            if (string.IsNullOrEmpty(arg.Action) || !arg.Action.StartsWith("Edit-", StringComparison.OrdinalIgnoreCase))
+            if (string.IsNullOrEmpty(entityView.Action) || !entityView.Action.StartsWith("Edit-", StringComparison.OrdinalIgnoreCase))
             {
-                return arg;
+                return entityView;
             }
 
             // Get the sellable item from the context
-            var sellableItem = context.CommerceContext.GetObject<SellableItem>(x => x.Id.Equals(arg.EntityId));
+            var sellableItem = context.CommerceContext.GetObject<SellableItem>(x => x.Id.Equals(entityView.EntityId));
             if (sellableItem == null)
             {
-                return arg;
+                return entityView;
             }
 
             var applicableComponentTypes = await this.catalogSchemaCommander.GetApplicableComponentTypes(context, sellableItem);
-            var editedComponentType = applicableComponentTypes.SingleOrDefault(comp => arg.Action == $"Edit-{comp.FullName}");
+            var editedComponentType = applicableComponentTypes.SingleOrDefault(comp => entityView.Action == $"Edit-{comp.FullName}");
 
             if (editedComponentType != null)
             {
                 // Get the component from the sellable item or its variation
-                Component component = (Component) sellableItem.Components.SingleOrDefault(comp => comp.GetType() == editedComponentType);
-                if (component == null)
-                {
-                    component = (Component)Activator.CreateInstance(editedComponentType);
-                    sellableItem.Components.Add(component);
-                }
+                var component = GetComponent(sellableItem, editedComponentType);
 
-                // Map entity view properties to component
-                var props = editedComponentType.GetProperties();
-
-                foreach (var prop in props)
-                {
-                    System.Attribute[] propAttributes = System.Attribute.GetCustomAttributes(prop);
-
-                    if (propAttributes.SingleOrDefault(attr => attr is PropertyAttribute) is PropertyAttribute propAttr)
-                    {
-                        prop.SetValue(component, arg.Properties.FirstOrDefault(x => x.Name.Equals(prop.Name, StringComparison.OrdinalIgnoreCase))?.Value);
-                    }
-                }
-                //component.WarrantyInformation = arg.Properties.FirstOrDefault(x => x.Name.Equals(nameof(NotesComponent.WarrantyInformation), StringComparison.OrdinalIgnoreCase))?.Value;
-                //component.InternalNotes = arg.Properties.FirstOrDefault(x => x.Name.Equals(nameof(NotesComponent.InternalNotes), StringComparison.OrdinalIgnoreCase))?.Value;
+                SetPropertyValuesOnComponent(editedComponentType, component, entityView, context);
 
                 // Persist changes
                 await this.catalogSchemaCommander.Pipeline<IPersistEntityPipeline>().Run(new PersistEntityArgument(sellableItem), context);
             }
 
-            return arg;
+            return entityView;
+        }
+
+        private Sitecore.Commerce.Core.Component GetComponent(SellableItem sellableItem, Type editedComponentType)
+        {
+            Sitecore.Commerce.Core.Component component = sellableItem.Components.SingleOrDefault(comp => comp.GetType() == editedComponentType);
+            if (component == null)
+            {
+                component = (Sitecore.Commerce.Core.Component)Activator.CreateInstance(editedComponentType);
+                sellableItem.Components.Add(component);
+            }
+
+            return component;
+        }
+
+        private void SetPropertyValuesOnComponent(Type editedComponentType,
+            Sitecore.Commerce.Core.Component editedComponent,
+            EntityView entityView,
+            CommercePipelineExecutionContext context)
+        {
+            // Map entity view properties to component
+            var props = editedComponentType.GetProperties();
+
+            foreach (var prop in props)
+            {
+                System.Attribute[] propAttributes = System.Attribute.GetCustomAttributes(prop);
+
+                if (propAttributes.SingleOrDefault(attr => attr is PropertyAttribute) is PropertyAttribute propAttr)
+                {
+                    var fieldValue = entityView.Properties.FirstOrDefault(x => x.Name.Equals(prop.Name, StringComparison.OrdinalIgnoreCase))?.Value;
+
+                    TypeConverter converter = TypeDescriptor.GetConverter(prop.PropertyType);
+                    if (converter.CanConvertFrom(typeof(string)) && converter.CanConvertTo(prop.PropertyType))
+                    {
+                        try
+                        {
+                            object propValue = converter.ConvertFromString(fieldValue);
+                            prop.SetValue(component, propValue);
+                        }
+                        catch (Exception)
+                        {
+                            context.Logger.LogWarning($"Could not convert property '{prop.Name}' with value '{fieldValue}' to type {prop.PropertyType}");
+                        }
+                    }
+                }
+            }
         }
     }
 }

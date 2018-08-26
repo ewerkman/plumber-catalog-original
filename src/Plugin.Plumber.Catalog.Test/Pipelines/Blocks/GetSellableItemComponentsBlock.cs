@@ -10,8 +10,9 @@ namespace Plugin.Plumber.Catalog.Sample.Pipelines.Blocks
     {
         public async override Task<SellableItemComponentsArgument> Run(SellableItemComponentsArgument arg, CommercePipelineExecutionContext context)
         {
-            arg.SellableItemComponents.Add(typeof(NotesComponent));
-            arg.SellableItemComponents.Add(typeof(SampleComponent));
+            arg.Add<NotesComponent>();
+            arg.Add<SampleComponent>();
+            arg.Add<WarrantyComponent>();
 
             return await Task.FromResult<SellableItemComponentsArgument>(arg);
         }
