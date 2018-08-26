@@ -19,10 +19,12 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
     public class DoActionEditComponentBlock : PipelineBlock<EntityView, EntityView, CommercePipelineExecutionContext>
     {
         private readonly CatalogSchemaCommander catalogSchemaCommander;
+        private readonly ILogger logger;
 
-        public DoActionEditComponentBlock(CatalogSchemaCommander catalogSchemaCommander)
+        public DoActionEditComponentBlock(CatalogSchemaCommander catalogSchemaCommander, ILoggerFactory loggerFactory)
         {
             this.catalogSchemaCommander = catalogSchemaCommander;
+            this.logger = loggerFactory.CreateLogger<DoActionEditComponentBlock>();
         }
 
         public async override Task<EntityView> Run(EntityView entityView, CommercePipelineExecutionContext context)
@@ -48,9 +50,9 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
             if (editedComponentType != null)
             {
                 // Get the component from the sellable item or its variation
-                var component = GetComponent(sellableItem, editedComponentType);
+                var editedComponent = GetEditedComponent(sellableItem, editedComponentType);
 
-                SetPropertyValuesOnComponent(editedComponentType, component, entityView, context);
+                SetPropertyValuesOnEditedComponent(entityView.Properties, editedComponentType, editedComponent);
 
                 // Persist changes
                 await this.catalogSchemaCommander.Pipeline<IPersistEntityPipeline>().Run(new PersistEntityArgument(sellableItem), context);
@@ -59,7 +61,7 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
             return entityView;
         }
 
-        private Sitecore.Commerce.Core.Component GetComponent(SellableItem sellableItem, Type editedComponentType)
+        private Sitecore.Commerce.Core.Component GetEditedComponent(SellableItem sellableItem, Type editedComponentType)
         {
             Sitecore.Commerce.Core.Component component = sellableItem.Components.SingleOrDefault(comp => comp.GetType() == editedComponentType);
             if (component == null)
@@ -71,10 +73,9 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
             return component;
         }
 
-        private void SetPropertyValuesOnComponent(Type editedComponentType,
-            Sitecore.Commerce.Core.Component editedComponent,
-            EntityView entityView,
-            CommercePipelineExecutionContext context)
+        private void SetPropertyValuesOnEditedComponent(List<ViewProperty> properties,
+            Type editedComponentType,
+            Sitecore.Commerce.Core.Component editedComponent)
         {
             // Map entity view properties to component
             var props = editedComponentType.GetProperties();
@@ -85,7 +86,7 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
 
                 if (propAttributes.SingleOrDefault(attr => attr is PropertyAttribute) is PropertyAttribute propAttr)
                 {
-                    var fieldValue = entityView.Properties.FirstOrDefault(x => x.Name.Equals(prop.Name, StringComparison.OrdinalIgnoreCase))?.Value;
+                    var fieldValue = properties.FirstOrDefault(x => x.Name.Equals(prop.Name, StringComparison.OrdinalIgnoreCase))?.Value;
 
                     TypeConverter converter = TypeDescriptor.GetConverter(prop.PropertyType);
                     if (converter.CanConvertFrom(typeof(string)) && converter.CanConvertTo(prop.PropertyType))
@@ -97,7 +98,7 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
                         }
                         catch (Exception)
                         {
-                            context.Logger.LogWarning($"Could not convert property '{prop.Name}' with value '{fieldValue}' to type {prop.PropertyType}");
+                            logger.LogWarning($"Could not convert property '{prop.Name}' with value '{fieldValue}' to type {prop.PropertyType}");
                         }
                     }
                 }
