@@ -93,7 +93,7 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
                         try
                         {
                             object propValue = converter.ConvertFromString(fieldValue);
-                            prop.SetValue(component, propValue);
+                            prop.SetValue(editedComponent, propValue);
                         }
                         catch (Exception)
                         {
