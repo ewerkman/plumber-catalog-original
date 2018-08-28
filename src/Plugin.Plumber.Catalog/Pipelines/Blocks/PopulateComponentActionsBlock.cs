@@ -32,7 +32,7 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
 
             var request = this.viewCommander.CurrentEntityViewArgument(context.CommerceContext);
 
-            if(!(request.Entity is SellableItem))
+            if(!(request?.Entity is SellableItem))
             {
                 return arg;
             }

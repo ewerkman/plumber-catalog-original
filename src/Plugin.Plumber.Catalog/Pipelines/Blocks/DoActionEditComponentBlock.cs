@@ -2,7 +2,6 @@
 using Sitecore.Commerce.EntityViews;
 using Sitecore.Commerce.Plugin.Catalog;
 using Plugin.Plumber.Catalog.Attributes;
-using Plugin.Plumber.Catalog.Pipelines.Arguments;
 using Sitecore.Framework.Conditions;
 using Sitecore.Framework.Pipelines;
 using System;
