@@ -56,5 +56,17 @@ namespace Plugin.Plumber.Catalog.Commanders
 
             return applicableComponentTypes;
         }
+
+        public Component GetEditedComponent(SellableItem sellableItem, Type editedComponentType)
+        {
+            Sitecore.Commerce.Core.Component component = sellableItem.Components.SingleOrDefault(comp => comp.GetType() == editedComponentType);
+            if (component == null)
+            {
+                component = (Component)Activator.CreateInstance(editedComponentType);
+                sellableItem.Components.Add(component);
+            }
+
+            return component;
+        }
     }
 }

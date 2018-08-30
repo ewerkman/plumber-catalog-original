@@ -10,6 +10,7 @@ using Plugin.Plumber.Catalog.Attributes;
 using Plugin.Plumber.Catalog.Pipelines.Arguments;
 using System.Collections.Generic;
 using Plugin.Plumber.Catalog.Commanders;
+using Plugin.Plumber.Catalog.Attributes.Validation;
 
 namespace Plugin.Plumber.Catalog.Pipelines.Blocks
 {
@@ -98,14 +99,25 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
 
                             if (propAttributes.SingleOrDefault(attr => attr is PropertyAttribute) is PropertyAttribute propAttr)
                             {
-                                targetView.Properties.Add(new ViewProperty
+                                var viewProperty = new ViewProperty
                                 {
                                     Name = prop.Name,
                                     DisplayName = propAttr.DisplayName,
                                     RawValue = component != null ? prop.GetValue(component) : "",
                                     IsReadOnly = !isEditView && propAttr.IsReadOnly,
-                                    IsRequired = propAttr.IsRequired                                    
-                                });
+                                    IsRequired = propAttr.IsRequired
+                                };
+
+                                if(propAttributes.SingleOrDefault(attr => attr is MinMaxValidationAttribute) is MinMaxValidationAttribute minMaxValidationAttribute)
+                                {
+                                    var minMaxViewPolicy = viewProperty.GetPolicy<MinMaxValuePolicy>();
+                                    minMaxViewPolicy.MinAllow = minMaxValidationAttribute.MinValue;
+                                    minMaxViewPolicy.MaxAllow = minMaxValidationAttribute.MaxValue;
+                                }
+
+                          
+
+                                targetView.Properties.Add(viewProperty);
                             }
                         }
                     }

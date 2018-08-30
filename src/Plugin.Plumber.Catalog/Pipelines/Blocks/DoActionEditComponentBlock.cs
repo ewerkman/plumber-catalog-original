@@ -49,7 +49,7 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
             if (editedComponentType != null)
             {
                 // Get the component from the sellable item or its variation
-                var editedComponent = GetEditedComponent(sellableItem, editedComponentType);
+                var editedComponent = catalogSchemaCommander.GetEditedComponent(sellableItem, editedComponentType);
 
                 SetPropertyValuesOnEditedComponent(entityView.Properties, editedComponentType, editedComponent);
 
@@ -58,18 +58,6 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
             }
 
             return entityView;
-        }
-
-        private Sitecore.Commerce.Core.Component GetEditedComponent(SellableItem sellableItem, Type editedComponentType)
-        {
-            Sitecore.Commerce.Core.Component component = sellableItem.Components.SingleOrDefault(comp => comp.GetType() == editedComponentType);
-            if (component == null)
-            {
-                component = (Sitecore.Commerce.Core.Component)Activator.CreateInstance(editedComponentType);
-                sellableItem.Components.Add(component);
-            }
-
-            return component;
         }
 
         private void SetPropertyValuesOnEditedComponent(List<ViewProperty> properties,

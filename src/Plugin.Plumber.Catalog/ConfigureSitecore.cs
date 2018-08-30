@@ -35,7 +35,7 @@ namespace Plugin.Plumber.Catalog
             services.RegisterAllCommands(assembly);
 
             services.Sitecore().Pipelines(
-                config => 
+                config =>
                     config
                         .ConfigurePipeline<IGetEntityViewPipeline>(c =>
                         {
@@ -52,7 +52,8 @@ namespace Plugin.Plumber.Catalog
                         })
                         .ConfigurePipeline<IDoActionPipeline>(c =>
                         {
-                            c.Add<DoActionEditComponentBlock>().After<ValidateEntityVersionBlock>();
+                            c.Add<DoActionAddMinMaxPropertyConstraintBlock>()
+                            .Add<DoActionEditComponentBlock>().After<ValidateEntityVersionBlock>();
                         })
                         .AddPipeline<IGetSellableItemComponentsPipeline, GetSellableItemComponentsPipeline>()
                         .ConfigurePipeline<IConfigureServiceApiPipeline>(c => c.Add<ConfigureServiceApiBlock>()));
