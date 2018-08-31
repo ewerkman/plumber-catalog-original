@@ -43,6 +43,12 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
                 return entityView;
             }
 
+            KnownResultCodes errorCodes = context.CommerceContext.GetPolicy<KnownResultCodes>();
+            if (context.CommerceContext.AnyMessage(msg => msg.Code == errorCodes.ValidationError))
+            {   // We found an error
+                return entityView;
+            }
+
             var applicableComponentTypes = await this.catalogSchemaCommander.GetApplicableComponentTypes(context, sellableItem);
             var editedComponentType = applicableComponentTypes.SingleOrDefault(comp => entityView.Action == $"Edit-{comp.FullName}");
 

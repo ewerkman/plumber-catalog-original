@@ -50,7 +50,7 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
                 // Get the component from the sellable item or its variation
                 var editedComponent = catalogSchemaCommander.GetEditedComponent(sellableItem, editedComponentType);
 
-                SetPropertyValuesOnEditedComponent(entityView.Properties, 
+                var error = await SetPropertyValuesOnEditedComponent(entityView.Properties, 
                     editedComponentType, editedComponent, context);
             }
 
@@ -66,12 +66,13 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
             */
         }
 
-        private async void SetPropertyValuesOnEditedComponent(List<ViewProperty> properties,
+        private async Task<bool> SetPropertyValuesOnEditedComponent(List<ViewProperty> properties,
                         Type editedComponentType,
                         Sitecore.Commerce.Core.Component editedComponent,
                         CommercePipelineExecutionContext context)
         {
             // Map entity view properties to component
+            var error = false;
             var props = editedComponentType.GetProperties();
 
             foreach (var prop in props)
@@ -94,7 +95,7 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
                                       {
                                         (object) "Blah"
                                       }, string.Format("Invalid or missing value for property '{0}'.", (object)"Blah"));
-
+                                error = true;
                             }
                         }
                     }
@@ -104,6 +105,7 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
                     }
                 }
             }
+            return error;
         }
 
     }

@@ -52,8 +52,8 @@ namespace Plugin.Plumber.Catalog
                         })
                         .ConfigurePipeline<IDoActionPipeline>(c =>
                         {
-                            c.Add<DoActionAddMinMaxPropertyConstraintBlock>()
-                            .Add<DoActionEditComponentBlock>().After<ValidateEntityVersionBlock>();
+                            c.Add<DoActionEditComponentBlock>().After<ValidateEntityVersionBlock>()
+                            .Add<DoActionAddMinMaxPropertyConstraintBlock>().Before<DoActionEditComponentBlock>();
                         })
                         .AddPipeline<IGetSellableItemComponentsPipeline, GetSellableItemComponentsPipeline>()
                         .ConfigurePipeline<IConfigureServiceApiPipeline>(c => c.Add<ConfigureServiceApiBlock>()));
