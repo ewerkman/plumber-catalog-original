@@ -50,23 +50,14 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
                 // Get the component from the sellable item or its variation
                 var editedComponent = catalogSchemaCommander.GetEditedComponent(sellableItem, editedComponentType);
 
-                var error = await SetPropertyValuesOnEditedComponent(entityView.Properties, 
+                var error = await AddMinMaxConstraint(entityView.Properties, 
                     editedComponentType, editedComponent, context);
             }
 
             return entityView;
-            /*
-
-            if (true)
-            {
- 
-            }
-
-            return arg;
-            */
         }
 
-        private async Task<bool> SetPropertyValuesOnEditedComponent(List<ViewProperty> properties,
+        private async Task<bool> AddMinMaxConstraint(List<ViewProperty> properties,
                         Type editedComponentType,
                         Sitecore.Commerce.Core.Component editedComponent,
                         CommercePipelineExecutionContext context)
@@ -78,6 +69,8 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
             foreach (var prop in props)
             {
                 Attribute[] propAttributes = Attribute.GetCustomAttributes(prop);
+
+                var propertyAttribute = propAttributes.SingleOrDefault(attr => attr is PropertyAttribute) as PropertyAttribute;
 
                 if (propAttributes.SingleOrDefault(attr => attr is MinMaxValidationAttribute) is MinMaxValidationAttribute minMaxAttr)
                 {
@@ -93,8 +86,8 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
                                 KnownResultCodes errorCodes = context.CommerceContext.GetPolicy<KnownResultCodes>();
                                 var str = await context.CommerceContext.AddMessage(errorCodes.ValidationError, "InvalidOrMissingPropertyValue", new object[1]
                                       {
-                                        (object) "Blah"
-                                      }, string.Format("Invalid or missing value for property '{0}'.", (object)"Blah"));
+                                        propertyAttribute?.DisplayName ?? prop.Name
+                                      }, $"Value for property '{ propertyAttribute?.DisplayName ?? prop.Name }' should be between {minMaxAttr.MinValue} and '{minMaxAttr.MaxValue}'.");
                                 error = true;
                             }
                         }
