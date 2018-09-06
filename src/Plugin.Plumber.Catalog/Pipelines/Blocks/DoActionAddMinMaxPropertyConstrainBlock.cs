@@ -50,14 +50,14 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
                 // Get the component from the sellable item or its variation
                 var editedComponent = catalogSchemaCommander.GetEditedComponent(sellableItem, editedComponentType);
 
-                var error = await AddMinMaxConstraint(entityView.Properties, 
+                var error = await ValidateMinMaxConstraint(entityView.Properties, 
                     editedComponentType, editedComponent, context);
             }
 
             return entityView;
         }
 
-        private async Task<bool> AddMinMaxConstraint(List<ViewProperty> properties,
+        private async Task<bool> ValidateMinMaxConstraint(List<ViewProperty> properties,
                         Type editedComponentType,
                         Sitecore.Commerce.Core.Component editedComponent,
                         CommercePipelineExecutionContext context)
@@ -78,13 +78,12 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
 
                     try
                     {
-                        decimal fieldValue;
-                        if (decimal.TryParse(fieldValueAsString, out fieldValue))
+                        if (decimal.TryParse(fieldValueAsString, out decimal fieldValue))
                         {
                             if (fieldValue < minMaxAttr.MinValue || fieldValue > minMaxAttr.MaxValue)
                             {
                                 KnownResultCodes errorCodes = context.CommerceContext.GetPolicy<KnownResultCodes>();
-                                var str = await context.CommerceContext.AddMessage(errorCodes.ValidationError, "InvalidOrMissingPropertyValue", new object[1]
+                                var str = await context.CommerceContext.AddMessage(errorCodes.ValidationError, "InvalidPropertyValueRange", new object[1]
                                       {
                                         propertyAttribute?.DisplayName ?? prop.Name
                                       }, $"Value for property '{ propertyAttribute?.DisplayName ?? prop.Name }' should be between {minMaxAttr.MinValue} and '{minMaxAttr.MaxValue}'.");

@@ -107,16 +107,7 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
                                     IsReadOnly = !isEditView && propAttr.IsReadOnly,
                                     IsRequired = propAttr.IsRequired
                                 };
-
-                                if(propAttributes.SingleOrDefault(attr => attr is MinMaxValidationAttribute) is MinMaxValidationAttribute minMaxValidationAttribute)
-                                {
-                                    var minMaxViewPolicy = viewProperty.GetPolicy<MinMaxValuePolicy>();
-                                    minMaxViewPolicy.MinAllow = minMaxValidationAttribute.MinValue;
-                                    minMaxViewPolicy.MaxAllow = minMaxValidationAttribute.MaxValue;
-                                }
-
-                          
-
+                                
                                 targetView.Properties.Add(viewProperty);
                             }
                         }

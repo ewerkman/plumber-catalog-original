@@ -44,7 +44,8 @@ namespace Plugin.Plumber.Catalog
                         .ConfigurePipeline<IGetEntityViewPipeline>(c =>
                         {
                             c.Add<GetComponentViewBlock>().After<GetSellableItemDetailsViewBlock>()
-                            .Add<GetComponentConnectViewBlock>().After<GetComponentViewBlock>();
+                            .Add<GetComponentConnectViewBlock>().After<GetComponentViewBlock>()
+                            .Add<GetAddMinMaxPropertyConstraintViewBlock>().After<GetComponentConnectViewBlock>();
                         })
                         .ConfigurePipeline<IPopulateEntityViewActionsPipeline>(c =>
                         {
