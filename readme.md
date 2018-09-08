@@ -6,7 +6,7 @@
 
 ## What is this?
 
-You can extend a Sitecore Commerce Catalog in two ways:
+Since Sitecore Commerce 9.0 update 2, you can extend a Sitecore Commerce Catalog in two ways:
 
 * Use the Entity Composer to create templates that add new properties to your catalog;
 * Create your own components that add properties as POCO classes and write pipeline blocks that add functionality to the Business tools to edit these properties;
@@ -79,7 +79,9 @@ namespace Plugin.Plumber.Catalog.Sample.Components
 }
 ```
 
-3. Plumber.Catalog needs to know that the `WarrantyComponent` is a component that can be added to a `SellableItem`. You create a pipeline block to the `IGetSellab
+3. Plumber.Catalog needs to know that the `WarrantyComponent` is a component that can be added to a `SellableItem`. You create a pipeline block and add it to the `IGetSellableItemComponentsPipeline`. Plumber.Catalog runs this pipeline to get a list of all the components that can be added to a sellable item.
+
+
 
 ## Available Attributes
 
@@ -108,7 +110,28 @@ Add a `PropertyAttribute` to each property of the class you want
 |Parameter|Description|
 |---------|-----------|
 |`DisplayName`|Name of the property to show in the Merchandising Manager|
-|`isReadOnly`|Set to `true` to indicate this property cannot be edited in the Merchandising Manager|
-|`isRequired`|Set to `true` if this property is required.|
+|`IsReadOnly`|Set to `true` to indicate this property cannot be edited in the Merchandising Manager|
+|`IsRequired`|Set to `true` if this property is required.|
+
+## Validation
+You can add validation attributes to the properties of your components so they can be automatically be validated from the Business Tools.
+
+### Included Validation Attributes
+Plumber.Catalog comes with the following validation attributes.
+
+#### MinMaxValidationAttribute
+
+Validates whether the value of the field is within a specified numerical range.
+
+#### RegExValidationAttribute
+
+Validates the value of the field using a regular expression.
+
+#### RequiredFieldValidationAttribute
+
+Use this to indicate the field is a required field. 
+
+### Custom validation
+You can create new validation attributes
 
 
