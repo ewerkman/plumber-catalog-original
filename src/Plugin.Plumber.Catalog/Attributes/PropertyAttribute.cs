@@ -13,7 +13,9 @@ namespace Plugin.Plumber.Catalog.Attributes
         public bool IsReadOnly { get; private set; }
         public bool IsRequired { get; private set; }
 
-        public PropertyAttribute(string displayName = "", bool isReadOnly = true, bool isRequired = false)
+        public PropertyAttribute(string displayName = "", 
+            bool isReadOnly = false, 
+            bool isRequired = false)
         {
             DisplayName = displayName;
             IsReadOnly = isReadOnly;

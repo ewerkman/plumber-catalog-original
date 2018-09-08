@@ -18,7 +18,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sitecore.Commerce.Engine", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Plugin.Plumber.Catalog", "Plugin.Plumber.Catalog\Plugin.Plumber.Catalog.csproj", "{141DDA76-D9CD-4E3C-AFFE-7A2E51A8579D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Plugin.Plumber.Catalog.Test", "Plugin.Plumber.Catalog.Test\Plugin.Plumber.Catalog.Test.csproj", "{447F35C5-3253-41D5-8DA2-9F797B22F1F2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Plugin.Plumber.Catalog.Sample", "Plugin.Plumber.Catalog.Test\Plugin.Plumber.Catalog.Sample.csproj", "{447F35C5-3253-41D5-8DA2-9F797B22F1F2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Plugin.Sample.Upgrade", "Plugin.Sample.Upgrade\Plugin.Sample.Upgrade.csproj", "{22173668-B750-4CBC-A202-499DAD1B32F5}"
 EndProject

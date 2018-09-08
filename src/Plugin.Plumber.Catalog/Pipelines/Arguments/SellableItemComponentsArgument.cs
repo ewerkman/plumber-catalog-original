@@ -14,5 +14,10 @@ namespace Plugin.Plumber.Catalog.Pipelines.Arguments
             ItemDefinition = itemDefition;
             SellableItemComponents = new List<Type>();
         }
+
+        public void Add<Type>()
+        {
+            SellableItemComponents.Add(typeof(Type));
+        }
     }
 }

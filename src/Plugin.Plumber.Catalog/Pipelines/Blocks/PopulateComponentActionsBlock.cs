@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Plugin.Plumber.Catalog.Commanders;
+using Plugin.Plumber.Catalog.Extensions;
 
 namespace Plugin.Plumber.Catalog.Pipelines.Blocks
 {
@@ -32,7 +33,7 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
 
             var request = this.viewCommander.CurrentEntityViewArgument(context.CommerceContext);
 
-            if(!(request.Entity is SellableItem))
+            if(!(request?.Entity is SellableItem))
             {
                 return arg;
             }
@@ -43,26 +44,23 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
             {
                 List<Type> applicableComponentTypes = await this.catalogSchemaCommander.GetApplicableComponentTypes(context, sellableItem);
 
-                foreach (var componentType in applicableComponentTypes)
+                var editableComponentType = applicableComponentTypes.SingleOrDefault(type => type.FullName == arg.Name);
+
+                if(editableComponentType != null)
                 {
-                    if (string.IsNullOrEmpty(arg?.Name) || !arg.Name.Equals(componentType.FullName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        continue;
-                    }
+                    var entityViewAttribute = editableComponentType.GetEntityViewAttribute();
 
                     var actionPolicy = arg.GetPolicy<ActionsPolicy>();
 
                     actionPolicy.Actions.Add(new EntityActionView
                     {
-                        Name = $"Edit-{componentType.FullName}",
-                        DisplayName = $"Edit {componentType.FullName}",
-                        Description = "Edits the sellable item notes",
+                        Name = $"Edit-{editableComponentType.FullName}",
+                        DisplayName = $"Edit {entityViewAttribute.ViewName}",
+                        Description = entityViewAttribute.ViewName,
                         IsEnabled = true,
                         EntityView = arg.Name,
                         Icon = "edit"
                     });
-
-                    break;
                 }
             }
             

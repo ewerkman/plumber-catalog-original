@@ -4,7 +4,7 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Plugin.Plumber.Catalog.Test
+namespace Plugin.Plumber.Catalog.Sample.Components
 {
     using Sitecore.Commerce.Core;
     using Plugin.Plumber.Catalog.Attributes;
