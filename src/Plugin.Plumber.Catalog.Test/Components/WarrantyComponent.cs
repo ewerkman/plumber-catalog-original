@@ -13,6 +13,7 @@ namespace Plugin.Plumber.Catalog.Sample.Components
         public int WarrantyLengthInMonths { get; set; }
 
         [Property("Additional warranty information")]
+        [RegExValidation(pattern: "^(Days|Months|Years)$")]
         public string WarrantyInformation { get; set; }
     }
 }

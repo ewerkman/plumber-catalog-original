@@ -88,6 +88,10 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
 
                         targetView = view;
                     }
+                    else
+                    {
+                        targetView.DisplayName = entityViewAttribute?.ViewName ?? componentType.Name;
+                    }
 
                     if (isCatalogView || isVariationView || (isPotentialEditView && isEditView))
                     {
