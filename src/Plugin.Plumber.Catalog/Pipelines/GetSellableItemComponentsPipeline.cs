@@ -5,6 +5,7 @@ using Sitecore.Framework.Pipelines;
 
 namespace Plugin.Plumber.Catalog.Pipelines
 {
+    [PipelineDisplayName(Constants.Pipelines.GetSellableItemComponentsPipeline)]
     public class GetSellableItemComponentsPipeline : CommercePipeline<SellableItemComponentsArgument, SellableItemComponentsArgument>, IGetSellableItemComponentsPipeline
     {
         public GetSellableItemComponentsPipeline(IPipelineConfiguration<IGetSellableItemComponentsPipeline> configuration, ILoggerFactory loggerFactory)

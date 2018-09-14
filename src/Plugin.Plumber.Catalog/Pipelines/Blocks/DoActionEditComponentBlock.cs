@@ -14,16 +14,17 @@ using Microsoft.Extensions.Logging;
 
 namespace Plugin.Plumber.Catalog.Pipelines.Blocks
 {
-    [PipelineDisplayName("DoActionEditComponentBlock")]
+    /// <summary>
+    ///     Applies the entered data to the component that is being edited.
+    /// </summary>
+    [PipelineDisplayName(Constants.Pipelines.Blocks.DoActionEditComponentBlock)]
     public class DoActionEditComponentBlock : PipelineBlock<EntityView, EntityView, CommercePipelineExecutionContext>
     {
         private readonly CatalogSchemaCommander catalogSchemaCommander;
-        private readonly ILogger logger;
 
-        public DoActionEditComponentBlock(CatalogSchemaCommander catalogSchemaCommander, ILoggerFactory loggerFactory)
+        public DoActionEditComponentBlock(CatalogSchemaCommander catalogSchemaCommander)
         {
             this.catalogSchemaCommander = catalogSchemaCommander;
-            this.logger = loggerFactory.CreateLogger<DoActionEditComponentBlock>();
         }
 
         public async override Task<EntityView> Run(EntityView entityView, CommercePipelineExecutionContext context)
@@ -49,7 +50,7 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
                 return entityView;
             }
 
-            var applicableComponentTypes = await this.catalogSchemaCommander.GetApplicableComponentTypes(context, sellableItem);
+            var applicableComponentTypes = await this.catalogSchemaCommander.GetApplicableComponentTypes(context.CommerceContext, sellableItem);
             var editedComponentType = applicableComponentTypes.SingleOrDefault(comp => entityView.Action == $"Edit-{comp.FullName}");
 
             if (editedComponentType != null)
@@ -57,7 +58,7 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
                 // Get the component from the sellable item or its variation
                 var editedComponent = catalogSchemaCommander.GetEditedComponent(sellableItem, editedComponentType);
 
-                SetPropertyValuesOnEditedComponent(entityView.Properties, editedComponentType, editedComponent);
+                SetPropertyValuesOnEditedComponent(entityView.Properties, editedComponentType, editedComponent, context.CommerceContext);
 
                 // Persist changes
                 await this.catalogSchemaCommander.Pipeline<IPersistEntityPipeline>().Run(new PersistEntityArgument(sellableItem), context);
@@ -68,7 +69,8 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
 
         private void SetPropertyValuesOnEditedComponent(List<ViewProperty> properties,
             Type editedComponentType,
-            Sitecore.Commerce.Core.Component editedComponent)
+            Sitecore.Commerce.Core.Component editedComponent,
+            CommerceContext context)
         {
             // Map entity view properties to component
             var props = editedComponentType.GetProperties();
@@ -91,7 +93,7 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
                         }
                         catch (Exception)
                         {
-                            logger.LogWarning($"Could not convert property '{prop.Name}' with value '{fieldValue}' to type {prop.PropertyType}");
+                            context.Logger.LogError($"Could not convert property '{prop.Name}' with value '{fieldValue}' to type '{prop.PropertyType}'");
                         }
                     }
                 }

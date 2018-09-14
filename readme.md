@@ -68,6 +68,7 @@ using Plugin.Plumber.Catalog.Attributes;
 namespace Plugin.Plumber.Catalog.Sample.Components
 {
 	[EntityView("Warranty Information")]
+	[AllSellableItems]
 	public class WarrantyComponent : Component
     {
         [Property("Warranty length (months)"]
@@ -84,6 +85,8 @@ namespace Plugin.Plumber.Catalog.Sample.Components
 
 
 ## Available Attributes
+
+Below you will find the attributes you can add to your components.
 
 ### EntityViewAttribute
 
@@ -105,33 +108,44 @@ Add the `ItemDefinitionAttribute` to a component class to specify the item defin
 
 ### PropertyAttribute
 
-Add a `PropertyAttribute` to each property of the class you want 
+Add a `PropertyAttribute` to each property of the class you want to be visible in the entity view in the Merchandising Manager.
 
 |Parameter|Description|
 |---------|-----------|
-|`DisplayName`|Name of the property to show in the Merchandising Manager|
+|`DisplayName`|Name of the property shown in the Merchandising Manager|
 |`IsReadOnly`|Set to `true` to indicate this property cannot be edited in the Merchandising Manager|
 |`IsRequired`|Set to `true` if this property is required.|
 
 ## Validation
-You can add validation attributes to the properties of your components so they can be automatically be validated from the Business Tools.
+You can add validation attributes to the properties of your components so they can be automatically be validated in the Merchandising Manager.
 
 ### Included Validation Attributes
 Plumber.Catalog comes with the following validation attributes.
 
 #### MinMaxValidationAttribute
 
-Validates whether the value of the field is within a specified numerical range.
+Validates whether the (numeric) value of the field is within a specified numerical range.
+
+|Parameter|Description|
+|---------|-----------|
+|`MinValue`|Lower value of the range|
+|`MaxValue`|Upper value of the range|
 
 #### RegExValidationAttribute
 
 Validates the value of the field using a regular expression.
+
+|Parameter|Description|
+|---------|-----------|
+|`Pattern`|Regular expression to match against the entered value|
 
 #### RequiredFieldValidationAttribute
 
 Use this to indicate the field is a required field. 
 
 ### Custom validation
-You can create new validation attributes
+You can create your own custom validation attributes.
+To create a new validation attribute do the following:
 
-
+1. Create a new attribute and derive it from `ValidationAttribute`.
+2. Implement the `Validate` method. 

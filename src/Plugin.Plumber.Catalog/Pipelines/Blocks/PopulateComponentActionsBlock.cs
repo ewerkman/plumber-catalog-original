@@ -15,6 +15,9 @@ using Plugin.Plumber.Catalog.Extensions;
 
 namespace Plugin.Plumber.Catalog.Pipelines.Blocks
 {
+    /// <summary>
+    ///     Populates the actions for the specified component
+    /// </summary>
     [PipelineDisplayName("PopulateComponentActionsBlock")]
     public class PopulateComponentActionsBlock : PipelineBlock<EntityView, EntityView, CommercePipelineExecutionContext>
     {
@@ -42,7 +45,7 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
 
             if (sellableItem != null)
             {
-                List<Type> applicableComponentTypes = await this.catalogSchemaCommander.GetApplicableComponentTypes(context, sellableItem);
+                List<Type> applicableComponentTypes = await this.catalogSchemaCommander.GetApplicableComponentTypes(context.CommerceContext, sellableItem);
 
                 var editableComponentType = applicableComponentTypes.SingleOrDefault(type => type.FullName == arg.Name);
 

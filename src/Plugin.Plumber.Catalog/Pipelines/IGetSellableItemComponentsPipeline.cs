@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace Plugin.Plumber.Catalog.Pipelines
 {
+    [PipelineDisplayName(Constants.Pipelines.GetSellableItemComponentsPipeline)]
     public interface IGetSellableItemComponentsPipeline : 
         IPipeline<SellableItemComponentsArgument, 
         SellableItemComponentsArgument, 

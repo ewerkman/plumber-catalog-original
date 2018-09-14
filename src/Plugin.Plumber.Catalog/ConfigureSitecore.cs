@@ -1,22 +1,16 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ConfigureSitecore.cs" company="Sitecore Corporation">
-//   Copyright (c) Sitecore Corporation 1999-2017
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+﻿using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
+using Sitecore.Commerce.Core;
+using Sitecore.Commerce.EntityViews;
+using Sitecore.Commerce.Plugin.Catalog;
+using Plugin.Plumber.Catalog.Pipelines;
+using Plugin.Plumber.Catalog.Pipelines.Blocks;
+using Sitecore.Framework.Configuration;
+using Sitecore.Framework.Pipelines.Definitions.Extensions;
+
 
 namespace Plugin.Plumber.Catalog
 {
-    using System.Reflection;
-    using Microsoft.Extensions.DependencyInjection;
-    using Sitecore.Commerce.Core;
-    using Sitecore.Commerce.EntityViews;
-    using Sitecore.Commerce.Plugin.Carts;
-    using Sitecore.Commerce.Plugin.Catalog;
-    using Plugin.Plumber.Catalog.Pipelines;
-    using Plugin.Plumber.Catalog.Pipelines.Blocks;
-    using Sitecore.Framework.Configuration;
-    using Sitecore.Framework.Pipelines.Definitions.Extensions;
-
     /// <summary>
     /// The configure sitecore class.
     /// </summary>
@@ -39,13 +33,9 @@ namespace Plugin.Plumber.Catalog
                     config
                         .ConfigurePipeline<IGetEntityViewPipeline>(c =>
                         {
-                            c.Add<GetRawSellableItemViewBlock>().Before<IFormatEntityViewPipeline>();
-                        })
-                        .ConfigurePipeline<IGetEntityViewPipeline>(c =>
-                        {
-                            c.Add<GetComponentViewBlock>().After<GetSellableItemDetailsViewBlock>()
-                            .Add<GetComponentConnectViewBlock>().After<GetComponentViewBlock>()
-                            .Add<GetAddMinMaxPropertyConstraintViewBlock>().After<GetComponentConnectViewBlock>();
+                            c
+                            .Add<GetComponentViewBlock>().After<GetSellableItemDetailsViewBlock>()
+                            .Add<GetComponentConnectViewBlock>().After<GetComponentViewBlock>();
                         })
                         .ConfigurePipeline<IPopulateEntityViewActionsPipeline>(c =>
                         {
