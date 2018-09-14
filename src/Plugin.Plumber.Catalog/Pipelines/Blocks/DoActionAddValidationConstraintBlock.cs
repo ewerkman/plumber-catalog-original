@@ -1,4 +1,5 @@
-﻿using Plugin.Plumber.Catalog.Attributes;
+﻿using Microsoft.Extensions.Logging;
+using Plugin.Plumber.Catalog.Attributes;
 using Plugin.Plumber.Catalog.Attributes.Validation;
 using Plugin.Plumber.Catalog.Commanders;
 using Sitecore.Commerce.Core;
@@ -15,7 +16,10 @@ using System.Threading.Tasks;
 
 namespace Plugin.Plumber.Catalog.Pipelines.Blocks
 {
-    [PipelineDisplayName("DoActionAddMinMaxPropertyConstrainBlock")]
+    /// <summary>
+    ///     Validates the data entered against the validation attributes. 
+    /// </summary>
+    [PipelineDisplayName(Constants.Pipelines.Blocks.DoActionAddValidationConstraintBlock)]
     public class DoActionAddValidationConstraintBlock : PipelineBlock<EntityView, EntityView, CommercePipelineExecutionContext>
     {
         private readonly CatalogSchemaCommander catalogSchemaCommander;
@@ -35,14 +39,14 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
                 return entityView;
             }
 
-            // Get the sellable item from the context
+            // Check if we have a sellable item on the context
             var sellableItem = context.CommerceContext.GetObject<SellableItem>(x => x.Id.Equals(entityView.EntityId));
             if (sellableItem == null)
             {
                 return entityView;
             }
 
-            var applicableComponentTypes = await this.catalogSchemaCommander.GetApplicableComponentTypes(context, sellableItem);
+            var applicableComponentTypes = await this.catalogSchemaCommander.GetApplicableComponentTypes(context.CommerceContext, sellableItem);
             var editedComponentType = applicableComponentTypes.SingleOrDefault(comp => entityView.Action == $"Edit-{comp.FullName}");
 
             if (editedComponentType != null)
@@ -50,19 +54,18 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
                 // Get the component from the sellable item or its variation
                 var editedComponent = catalogSchemaCommander.GetEditedComponent(sellableItem, editedComponentType);
 
-                var error = await ValidateMinMaxConstraint(entityView.Properties,
+                var error = await ValidateConstraints(entityView.Properties,
                     editedComponentType, editedComponent, context);
             }
 
             return entityView;
         }
 
-        private async Task<bool> ValidateMinMaxConstraint(List<ViewProperty> properties,
+        private async Task<bool> ValidateConstraints(List<ViewProperty> properties,
                         Type editedComponentType,
                         Sitecore.Commerce.Core.Component editedComponent,
                         CommercePipelineExecutionContext context)
         {
-            // Map entity view properties to component
             var error = false;
             var props = editedComponentType.GetProperties();
 
@@ -88,7 +91,7 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
                     }
                     catch (Exception)
                     {
-                        // logger.LogWarning($"Could not convert property '{prop.Name}' with value '{fieldValue}' to type {prop.PropertyType}");
+                        context.Logger.LogError($"Could not validate property '{prop.Name}' with value '{fieldValueAsString}' using validator '{validationAttribute.GetType().FullName}'");
                     }
                 }
             }

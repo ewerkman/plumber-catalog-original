@@ -14,7 +14,10 @@ using System.Threading.Tasks;
 
 namespace Plugin.Plumber.Catalog.Pipelines.Blocks
 {
-    [PipelineDisplayName("GetComponentConnectViewBlock")]
+    /// <summary>
+    ///     Creates Sitecore template
+    /// </summary>
+    [PipelineDisplayName(Constants.Pipelines.Blocks.GetComponentConnectViewBlock)]
     public class GetComponentConnectViewBlock : PipelineBlock<EntityView, EntityView, CommercePipelineExecutionContext>
     {
         private readonly CatalogSchemaCommander catalogSchemaCommander;
@@ -48,7 +51,7 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
                 return arg;
             }
 
-            List<Type> allComponentTypes = await catalogSchemaCommander.GetAllComponentTypes(context, sellableItem);
+            List<Type> allComponentTypes = await catalogSchemaCommander.GetAllComponentTypes(context.CommerceContext, sellableItem);
 
             var targetView = arg;
 

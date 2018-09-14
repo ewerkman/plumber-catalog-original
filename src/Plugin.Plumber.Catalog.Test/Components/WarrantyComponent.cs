@@ -5,7 +5,7 @@ using Plugin.Plumber.Catalog.Attributes.Validation;
 namespace Plugin.Plumber.Catalog.Sample.Components
 {
     [EntityView("Warranty Information")]
-    [ItemDefinition("Refrigerator")]
+    [AllSellableItems]
     public class WarrantyComponent : Component
     {
         [Property("Warranty length (months)")]

@@ -11,10 +11,6 @@ namespace Plugin.Plumber.Catalog.Attributes
     {
         public string ViewName { get; private set; }
 
-        public EntityViewAttribute()
-        {
-        }
-
         public EntityViewAttribute(string viewName)
         {
             ViewName = viewName;

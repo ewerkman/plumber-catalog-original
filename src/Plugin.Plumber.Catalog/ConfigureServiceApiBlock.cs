@@ -25,7 +25,7 @@ namespace Plugin.Plumber.Catalog
     ///         Sitecore.Commerce.Core.CommercePipelineExecutionContext}
     ///     </cref>
     /// </seealso>
-    [PipelineDisplayName("SamplePluginConfigureServiceApiBlock")]
+    [PipelineDisplayName(Constants.Pipelines.Blocks.ConfigureServiceApiBlock)]
     public class ConfigureServiceApiBlock : PipelineBlock<ODataConventionModelBuilder, ODataConventionModelBuilder, CommercePipelineExecutionContext>
     {
         /// <summary>

@@ -14,6 +14,9 @@ using Plugin.Plumber.Catalog.Attributes.Validation;
 
 namespace Plugin.Plumber.Catalog.Pipelines.Blocks
 {
+    /// <summary>
+    ///     Creates the component view applicable to the selected sellable item.
+    /// </summary>
     [PipelineDisplayName("GetComponentViewBlock")]
     public class GetComponentViewBlock : PipelineBlock<EntityView, EntityView, CommercePipelineExecutionContext>
     {
@@ -43,14 +46,14 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
             var isCatalogView = request.ViewName.Equals(catalogViewsPolicy.Master, StringComparison.OrdinalIgnoreCase);
             var isVariationView = request.ViewName.Equals(catalogViewsPolicy.Variant, StringComparison.OrdinalIgnoreCase);
             var isPotentialEditView = arg.Action.StartsWith("Edit-", StringComparison.OrdinalIgnoreCase);
-
+          
             // Make sure that we target the correct views
             if (!isCatalogView && !isVariationView && !isPotentialEditView)
             {
                 return arg;
             }
 
-            List<Type> applicableComponentTypes = await this.catalogSchemaCommander.GetApplicableComponentTypes(context, sellableItem);
+            List<Type> applicableComponentTypes = await this.catalogSchemaCommander.GetApplicableComponentTypes(context.CommerceContext, sellableItem);
 
             // See if we are dealing with the base sellable item or one of its variations.
             var variationId = string.Empty;
