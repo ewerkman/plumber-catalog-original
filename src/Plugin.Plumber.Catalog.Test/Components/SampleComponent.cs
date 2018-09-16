@@ -20,7 +20,7 @@ namespace Plugin.Plumber.Catalog.Sample.Components
         /// <summary>
         /// Gets or sets the name.
         /// </summary>
-        [Property("Description of the sample component")]
+        [Property("Description of the sample component", showInList: true)]
         public string Description { get; set; }
 
         /// <summary>

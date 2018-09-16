@@ -40,8 +40,6 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
                 return arg;
             }
 
-            var sellableItem = (SellableItem)request.Entity;
-
             var catalogViewsPolicy = context.GetPolicy<KnownCatalogViewsPolicy>();
             var isConnectView = arg.Name.Equals(catalogViewsPolicy.ConnectSellableItem, StringComparison.OrdinalIgnoreCase);            
 
@@ -51,15 +49,13 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
                 return arg;
             }
 
-            List<Type> allComponentTypes = await catalogSchemaCommander.GetAllComponentTypes(context.CommerceContext, sellableItem);
+            List<Type> allComponentTypes = await catalogSchemaCommander.GetAllComponentTypes(context.CommerceContext);
 
             var targetView = arg;
 
             foreach (var componentType in allComponentTypes)
             {
                 System.Attribute[] attrs = System.Attribute.GetCustomAttributes(componentType);
-
-                var component = sellableItem.Components.SingleOrDefault(comp => comp.GetType() == componentType);
 
                 if (attrs.SingleOrDefault(attr => attr is EntityViewAttribute) is EntityViewAttribute entityViewAttribute)
                 {
@@ -85,13 +81,11 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
 
                         if (propAttributes.SingleOrDefault(attr => attr is PropertyAttribute) is PropertyAttribute propAttr)
                         {
-                            var value = prop.GetValue(component);
-
                             targetView.Properties.Add(new ViewProperty
                             {
                                 Name = prop.Name,
                                 DisplayName = propAttr.DisplayName,
-                                RawValue = component != null ? value : "",
+                                OriginalType =prop.PropertyType.FullName,
                                 IsReadOnly = propAttr.IsReadOnly,
                                 IsRequired = propAttr.IsRequired
                             });
