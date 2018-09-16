@@ -6,16 +6,14 @@ namespace Plugin.Plumber.Catalog.Pipelines.Arguments
 {
     public class SellableItemComponentsArgument : PipelineArgument
     {
-        public string ItemDefinition { get; set; }
         public List<Type> SellableItemComponents { get; private set; }
 
-        public SellableItemComponentsArgument(string itemDefition)
+        public SellableItemComponentsArgument()
         {
-            ItemDefinition = itemDefition;
             SellableItemComponents = new List<Type>();
         }
 
-        public void Add<Type>()
+        public void RegisterComponent<Type>() where Type : Component
         {
             SellableItemComponents.Add(typeof(Type));
         }

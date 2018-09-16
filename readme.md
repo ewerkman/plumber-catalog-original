@@ -58,7 +58,7 @@ Now, if you want users to be able to edit the warranty information in the Mercha
 Instead, with __Plumber Catalog__ you do the following:
 
 1. Add a dependency on the Plumber.Catalog Nuget package.
-2. Change the `WarrantyComponent` class so it looks like this:
+2. Add some attributes to the `WarrantyComponent` class so it looks like this:
 
 
 ```c#
@@ -80,7 +80,28 @@ namespace Plugin.Plumber.Catalog.Sample.Components
 }
 ```
 
-3. Plumber.Catalog needs to know that the `WarrantyComponent` is a component that can be added to a `SellableItem`. You create a pipeline block and add it to the `IGetSellableItemComponentsPipeline`. Plumber.Catalog runs this pipeline to get a list of all the components that can be added to a sellable item.
+3. Plumber.Catalog needs to know that the `WarrantyComponent` is a component that can be added to a `SellableItem`.  To register your components with Plumber.Catalog, you create a pipeline block and add it to the `IGetSellableItemComponentsPipeline`. Plumber.Catalog runs this pipeline to get a list of all the components that can be added to a sellable item. The pipeline block to register types looks like this:
+```c#
+using Sitecore.Commerce.Core;
+using Plugin.Plumber.Catalog.Pipelines.Arguments;
+using Sitecore.Framework.Pipelines;
+using System.Threading.Tasks;
+using Plugin.Plumber.Catalog.Sample.Components;
+
+namespace Plugin.Plumber.Catalog.Sample.Pipelines.Blocks
+{
+    public class GetSellableItemComponentsBlock : PipelineBlock<SellableItemComponentsArgument, SellableItemComponentsArgument, CommercePipelineExecutionContext>
+    {
+        public async override Task<SellableItemComponentsArgument> Run(SellableItemComponentsArgument arg, CommercePipelineExecutionContext context)
+        {
+            arg.Register<WarrantyComponent>();
+
+            return await Task.FromResult<SellableItemComponentsArgument>(arg);
+        }
+    }
+}
+```
+This code registers three components with Plumber.Catalog. 
 
 
 

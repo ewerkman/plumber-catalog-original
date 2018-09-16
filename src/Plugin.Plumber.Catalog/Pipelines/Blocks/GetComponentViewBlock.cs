@@ -106,16 +106,19 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
 
                             if (propAttributes.SingleOrDefault(attr => attr is PropertyAttribute) is PropertyAttribute propAttr)
                             {
-                                var viewProperty = new ViewProperty
+                                if (isEditView || (!isEditView && propAttr.ShowInList))
                                 {
-                                    Name = prop.Name,
-                                    DisplayName = propAttr.DisplayName,
-                                    RawValue = component != null ? prop.GetValue(component) : "",
-                                    IsReadOnly = !isEditView && propAttr.IsReadOnly,
-                                    IsRequired = propAttr.IsRequired
-                                };
-                                
-                                targetView.Properties.Add(viewProperty);
+                                    var viewProperty = new ViewProperty
+                                    {
+                                        Name = prop.Name,
+                                        DisplayName = propAttr.DisplayName,
+                                        RawValue = component != null ? prop.GetValue(component) : "",
+                                        IsReadOnly = !isEditView && propAttr.IsReadOnly,
+                                        IsRequired = propAttr.IsRequired
+                                    };
+
+                                    targetView.Properties.Add(viewProperty);
+                                }
                             }
                         }
                     }

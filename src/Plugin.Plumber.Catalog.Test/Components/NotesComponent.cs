@@ -8,7 +8,7 @@ namespace Plugin.Plumber.Catalog.Sample.Components
     [ItemDefinition("Product")]
     public class NotesComponent : Component
     {
-        [Property("Warranty Information", isRequired: true)]
+        [Property("Warranty Information", isRequired: true, showInList: true)]
         public string WarrantyInformation { get; set; } = string.Empty;
 
         [Property("Internal Notes")]
