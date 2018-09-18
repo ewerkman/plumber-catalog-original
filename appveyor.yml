@@ -18,3 +18,11 @@ before_build:
 - cmd: dotnet restore src
 build:
   verbosity: minimal
+
+build_script:
+- ps: Build.ps1
+
+artifacts:
+    - path: .\artifacts\*\*
+
+    
