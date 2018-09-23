@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Plugin.Plumber.Catalog.Attributes;
-using Plugin.Plumber.Catalog.Attributes.Validation;
 using Plugin.Plumber.Catalog.Commanders;
+using Plugin.Plumber.Catalog.Extensions;
 using Sitecore.Commerce.Core;
 using Sitecore.Commerce.EntityViews;
 using Sitecore.Commerce.Plugin.Catalog;
@@ -9,9 +9,8 @@ using Sitecore.Framework.Conditions;
 using Sitecore.Framework.Pipelines;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Plugin.Plumber.Catalog.Pipelines.Blocks
@@ -53,8 +52,8 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
             {
                 // Get the component from the sellable item or its variation
                 var editedComponent = catalogSchemaCommander.GetEditedComponent(sellableItem, editedComponentType);
-
-                var error = await ValidateConstraints(entityView.Properties,
+              
+                await ValidateConstraints(entityView.Properties,
                     editedComponentType, editedComponent, context);
             }
 
@@ -66,37 +65,49 @@ namespace Plugin.Plumber.Catalog.Pipelines.Blocks
                         Sitecore.Commerce.Core.Component editedComponent,
                         CommercePipelineExecutionContext context)
         {
-            var error = false;
+            var result = true;
             var props = editedComponentType.GetProperties();
 
             foreach (var prop in props)
             {
+                var fieldValueAsString = properties.FirstOrDefault(x => x.Name.Equals(prop.Name, StringComparison.OrdinalIgnoreCase))?.Value;
+
                 Attribute[] propAttributes = Attribute.GetCustomAttributes(prop);
 
                 var propertyAttribute = propAttributes.SingleOrDefault(attr => attr is PropertyAttribute) as PropertyAttribute;
 
-                if (propAttributes.SingleOrDefault(attr => attr is ValidationAttribute) is ValidationAttribute validationAttribute)
+                if (propertyAttribute != null)
                 {
-                    var fieldValueAsString = properties.FirstOrDefault(x => x.Name.Equals(prop.Name, StringComparison.OrdinalIgnoreCase))?.Value;
-
-                    try
+                    var isValidProperty = await ValidateProperty(prop, fieldValueAsString, propAttributes, propertyAttribute, context);
+                    if(!isValidProperty)
                     {
-                        var valid = await validationAttribute.Validate(fieldValueAsString, prop, propertyAttribute, context.CommerceContext);
-
-                        if (!valid)
-                        {
-                            error = true;
-                        }
-
-                    }
-                    catch (Exception)
-                    {
-                        context.Logger.LogError($"Could not validate property '{prop.Name}' with value '{fieldValueAsString}' using validator '{validationAttribute.GetType().FullName}'");
+                        result = false;
                     }
                 }
             }
-            return error;
+
+            return result;
         }
 
+        private async Task<bool> ValidateProperty(System.Reflection.PropertyInfo prop, string fieldValueAsString, Attribute[] propAttributes, PropertyAttribute propertyAttribute, CommercePipelineExecutionContext context)
+        {
+            var validationAttributes = propAttributes.OfType<ValidationAttribute>();
+            var validationResults = new List<ValidationResult>();
+
+            var valid = Validator.TryValidateValue(fieldValueAsString, new ValidationContext(fieldValueAsString, null, null), validationResults, validationAttributes);
+            if (!valid)
+            {
+                foreach (var validationResult in validationResults)
+                {
+                    KnownResultCodes errorCodes = context.CommerceContext.GetPolicy<KnownResultCodes>();
+                    var str = await context.CommerceContext.AddMessage(errorCodes.ValidationError, "InvalidPropertyValueRange", new object[1]
+                          {
+                                propertyAttribute?.DisplayName ?? prop.Name
+                          }, $"There was an error for '{ propertyAttribute?.DisplayName ?? prop.Name }': '{validationResult.ErrorMessage}'.");
+                }
+            }
+
+            return valid;
+        }
     }
 }

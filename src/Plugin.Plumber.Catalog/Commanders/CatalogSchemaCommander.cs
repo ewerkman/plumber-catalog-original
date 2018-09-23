@@ -1,12 +1,14 @@
-﻿using Plugin.Plumber.Catalog.Attributes;
+﻿using Microsoft.Extensions.Logging;
+using Plugin.Plumber.Catalog.Attributes;
 using Plugin.Plumber.Catalog.Pipelines;
 using Plugin.Plumber.Catalog.Pipelines.Arguments;
 using Sitecore.Commerce.Core;
+using Sitecore.Commerce.EntityViews;
 using Sitecore.Commerce.Plugin.Catalog;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Plugin.Plumber.Catalog.Commanders
@@ -80,16 +82,50 @@ namespace Plugin.Plumber.Catalog.Commanders
         /// <param name="sellableItem"></param>
         /// <param name="editedComponentType"></param>
         /// <returns></returns>
-        public Component GetEditedComponent(SellableItem sellableItem, Type editedComponentType)
+        public Sitecore.Commerce.Core.Component GetEditedComponent(SellableItem sellableItem, Type editedComponentType)
         {
             Sitecore.Commerce.Core.Component component = sellableItem.Components.SingleOrDefault(comp => comp.GetType() == editedComponentType);
             if (component == null)
             {
-                component = (Component)Activator.CreateInstance(editedComponentType);
+                component = (Sitecore.Commerce.Core.Component)Activator.CreateInstance(editedComponentType);
                 sellableItem.Components.Add(component);
             }
 
             return component;
         }
+
+        public void SetPropertyValuesOnEditedComponent(List<ViewProperty> properties,
+            Type editedComponentType,
+            Sitecore.Commerce.Core.Component editedComponent,
+            CommerceContext context)
+        {
+            // Map entity view properties to component
+            var props = editedComponentType.GetProperties();
+
+            foreach (var prop in props)
+            {
+                System.Attribute[] propAttributes = System.Attribute.GetCustomAttributes(prop);
+
+                if (propAttributes.SingleOrDefault(attr => attr is PropertyAttribute) is PropertyAttribute propAttr)
+                {
+                    var fieldValue = properties.FirstOrDefault(x => x.Name.Equals(prop.Name, StringComparison.OrdinalIgnoreCase))?.Value;
+
+                    TypeConverter converter = TypeDescriptor.GetConverter(prop.PropertyType);
+                    if (converter.CanConvertFrom(typeof(string)) && converter.CanConvertTo(prop.PropertyType))
+                    {
+                        try
+                        {
+                            object propValue = converter.ConvertFromString(fieldValue);
+                            prop.SetValue(editedComponent, propValue);
+                        }
+                        catch (Exception)
+                        {
+                            context.Logger.LogError($"Could not convert property '{prop.Name}' with value '{fieldValue}' to type '{prop.PropertyType}'");
+                        }
+                    }
+                }
+            }
+        }
+
     }
 }
