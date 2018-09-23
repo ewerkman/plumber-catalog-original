@@ -4,7 +4,7 @@
     <VersionPrefix>1.0.0</VersionPrefix>
     <Authors>Plumber-SC</Authors>
     <TargetFramework>net462</TargetFramework>
-    <PackageTags>$(PackageTags);Commerce;Sample;Plugin</PackageTags>
+    <PackageTags>$(PackageTags);Commerce;Plugin</PackageTags>
     <PackageIconUrl>http://plumber-sc.com/favicon.ico</PackageIconUrl>
     <PackageProjectUrl>http://plumber-sc.com</PackageProjectUrl>
     <PackageLicenseUrl>http://plumber-sc.com</PackageLicenseUrl>
