@@ -22,7 +22,10 @@ This means you just add attributes to your catalog component class and Plumber C
 
 ## How to use it? 
 
-Add a dependency on Plumber.Catalog to the plugin that contains your catalog components. 
+Add a dependency on Plumber.Catalog to the plugin that contains your catalog components:
+
+* From the package manager console: `Install-Package Plugin.Plumber.Catalog` 
+* Using the Nuget package manager add a dependency on `Plugin.Plumber.Catalog`.
 
 ## Getting started
 
@@ -57,7 +60,7 @@ Now, if you want users to be able to edit the warranty information in the Mercha
 
 Instead, with __Plumber Catalog__ you do the following:
 
-1. Add a dependency on the Plumber.Catalog Nuget package.
+1. Add a dependency on the Plumber.Catalog Nuget package. You can use the package manager console and execute the following command: `Install-Package Plugin.Plumber.Catalog` or add a dependency on `Plugin.Plumber.Catalog` using the Nuget Package Manager.
 2. Add some attributes to the `WarrantyComponent` class so it looks like this:
 
 
