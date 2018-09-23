@@ -26,7 +26,7 @@ Add a dependency on Plumber.Catalog to the plugin that contains your catalog com
 
 ## Getting started
 
-You want to extend a sellable item with information on the warranty. You want to add two fields: 
+Let's say you want to extend a sellable item with information on the warranty. You want to add two fields: 
 
 * An integer value indicating the number of months warranty you get with the product;
 * A piece of text (string) giving more information on the warranty.
@@ -74,11 +74,16 @@ namespace Plugin.Plumber.Catalog.Sample.Components
         [Property("Warranty length (months)"]
         public int WarrantyLengthInMonths { get; set; }
 
-        [Property("Additional warranty information")]
+        [Property("Additional warranty information", )]
         public string WarrantyInformation { get; set; }
     }
 }
 ```
+This code does three things:
+
+ - The `EntityView` attribute indicates you want to use this component in an entity view in the Merchandising Manager. 
+ - The `AllSellableItems` attribute indicates this component should be added to all sellable items. There is also an `ItemDefinition` attribute you can use to add a component based on the item definition of a sellable item.
+ - Adds a `Property` attribute to each 
 
 3. Plumber.Catalog needs to know that the `WarrantyComponent` is a component that can be added to a `SellableItem`.  To register your components with Plumber.Catalog, you create a pipeline block and add it to the `IGetSellableItemComponentsPipeline`. Plumber.Catalog runs this pipeline to get a list of all the components that can be added to a sellable item. The pipeline block to register types looks like this:
 ```c#
@@ -138,35 +143,36 @@ Add a `PropertyAttribute` to each property of the class you want to be visible i
 |`IsRequired`|Set to `true` if this property is required.|
 
 ## Validation
-You can add validation attributes to the properties of your components so they can be automatically be validated in the Merchandising Manager.
+You can add validation attributes from the `System.ComponentModel.DataAnnotations` namespace to the properties of your components so they can be automatically be validated in the Merchandising Manager. 
 
-### Included Validation Attributes
-Plumber.Catalog comes with the following validation attributes.
+Plumber.Catalog adds the `DoActionAddValidationConstraintsBlock` to the `IDoActionPipeline` pipeline, which will validate the entered data and adds error messages if necessary.
 
-#### MinMaxValidationAttribute
+Below is an example of using the data annotations attributes:
 
-Validates whether the (numeric) value of the field is within a specified numerical range.
+```c#
+using Sitecore.Commerce.Core;
+using Plugin.Plumber.Catalog.Attributes;
+using System.ComponentModel.DataAnnotations;
 
-|Parameter|Description|
-|---------|-----------|
-|`MinValue`|Lower value of the range|
-|`MaxValue`|Upper value of the range|
+namespace Plugin.Plumber.Catalog.Sample.Components
+{
+    [EntityView("Warranty Information")]
+    [AllSellableItems]
+    public class WarrantyComponent : Component
+    {
+        [Property("Warranty length (months)", showInList:true)]
+        [Range(12, 24)]
+        public int WarrantyLengthInMonths { get; set; }
 
-#### RegExValidationAttribute
+        [Property("Additional warranty information", showInList:true)]
+        [RegularExpression(pattern: "^(Days|Months|Years)$",
+            ErrorMessage ="Valid values are: Days, Months, Years")]
+        public string WarrantyInformation { get; set; }
+    }
+}
+```
 
-Validates the value of the field using a regular expression.
+In this example: 
 
-|Parameter|Description|
-|---------|-----------|
-|`Pattern`|Regular expression to match against the entered value|
-
-#### RequiredFieldValidationAttribute
-
-Use this to indicate the field is a required field. 
-
-### Custom validation
-You can create your own custom validation attributes.
-To create a new validation attribute do the following:
-
-1. Create a new attribute and derive it from `ValidationAttribute`.
-2. Implement the `Validate` method. 
+* the`WarrantyLengthInMonths` property has to be in the range 12 to 24;
+* the `WarrantyInformation` property is validated by a `RegularExpression` validator and has to be one of `Days`, `Months` or `Years`,
