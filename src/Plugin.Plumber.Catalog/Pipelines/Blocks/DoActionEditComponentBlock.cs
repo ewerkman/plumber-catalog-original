@@ -1,16 +1,12 @@
 ﻿using Sitecore.Commerce.Core;
 using Sitecore.Commerce.EntityViews;
 using Sitecore.Commerce.Plugin.Catalog;
-using Plugin.Plumber.Catalog.Attributes;
 using Sitecore.Framework.Conditions;
 using Sitecore.Framework.Pipelines;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Plugin.Plumber.Catalog.Commanders;
-using System.ComponentModel;
-using Microsoft.Extensions.Logging;
 
 namespace Plugin.Plumber.Catalog.Pipelines.Blocks
 {
